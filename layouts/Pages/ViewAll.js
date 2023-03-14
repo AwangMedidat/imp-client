@@ -12,14 +12,13 @@ const ViewAll = memo((props) => {
   const [dataEdit, setDataEdit] = useState({});
 
   const handleOpenModal = () => {
-    setIsEdit(false);
     setIsModalOpen(true);
+    setIsEdit(false)
   };
 
   const editDataModal = (id) => {
     setIsModalOpen(true);
     setIsEdit(true);
-    // setIdEdit(id)
     axiosInstance
       .get(`/post/${id}`)
       .then(function (response) {
@@ -40,7 +39,10 @@ const ViewAll = memo((props) => {
   };
 
   const onSubmit = (data) => {
-    console.log(isEdit, "<<< issue");
+    const updatePost = {
+        ...dataEdit,
+        ...data
+    }
     Swal.fire({
       title: "Are you sure?",
       text: "You can check more the data",
@@ -48,24 +50,24 @@ const ViewAll = memo((props) => {
       showCancelButton: true,
       confirmButtonColor: "#3085d6",
       cancelButtonColor: "#d33",
-      confirmButtonText: "Yes, add it!",
+      confirmButtonText: "Yes",
     }).then((result) => {
       if (result.isConfirmed) {
         if (isEdit) {
-          axiosInstance
-            .put(`post/${data?.id}`, data)
-            .then((res) => {
-              Swal.fire({
-                icon: "success",
-                title: "Success!",
-                text: "Your request has been edited.",
-              }).then((result) => {
-                window.location.reload();
+            axiosInstance
+              .put(`post/${dataEdit?.id}`, updatePost)
+              .then((res) => {
+                Swal.fire({
+                  icon: "success",
+                  title: "Success!",
+                  text: "Your request has been edited.",
+                }).then((result) => {
+                  window.location.reload();
+                });
+              })
+              .catch((e) => {
+                console.log(e);
               });
-            })
-            .catch((e) => {
-              console.log(e);
-            });
         } else {
           axiosInstance
             .post("/post", data)
@@ -84,7 +86,6 @@ const ViewAll = memo((props) => {
         }
       }
     });
-    console.log(data);
     handleCloseModal();
   };
   useEffect(() => {

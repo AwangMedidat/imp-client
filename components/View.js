@@ -76,7 +76,7 @@ const View = ({ data, editDataModal }) => {
                 <p>Mohon Tunggu ...</p>
               ) : (
                 <>
-                  <Tr key={i}>
+                  <Tr key={e?.id}>
                     <Td>{i + 1}</Td>
                     <Td>{e?.name}</Td>
                     <Td>{e?.divisi}</Td>

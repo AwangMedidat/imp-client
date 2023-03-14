@@ -15,12 +15,14 @@ import {
   ModalOverlay,
 } from "@chakra-ui/react";
 
-const FormModal = memo(({ dataEdit, isEdit, isOpen, onClose, onSubmit }) => {
+const FormModal = ({ dataEdit, isEdit, isOpen, onClose, onSubmit }) => {
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm();
+  } = useForm({
+    defaultValues: dataEdit,
+  });
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} isCentered>
@@ -33,14 +35,9 @@ const FormModal = memo(({ dataEdit, isEdit, isOpen, onClose, onSubmit }) => {
             <FormControl isInvalid={errors.name}>
               <FormLabel>Nama</FormLabel>
               <Input
+                name="name"
                 {...register("name", { required: true })}
-                value={
-                  isEdit
-                    ? !dataEdit?.name
-                      ? "Mohon Tunggu..."
-                      : dataEdit?.name
-                    : ""
-                }
+                defaultValue={dataEdit?.name}
               />
               <FormErrorMessage>
                 {errors.name && "Nama harus diisi"}
@@ -50,13 +47,7 @@ const FormModal = memo(({ dataEdit, isEdit, isOpen, onClose, onSubmit }) => {
               <FormLabel>Divisi</FormLabel>
               <Input
                 {...register("divisi", { required: true })}
-                value={
-                  isEdit
-                    ? !dataEdit?.divisi
-                      ? "Mohon Tunggu..."
-                      : dataEdit?.divisi
-                    : ""
-                }
+                defaultValue={dataEdit?.divisi}
               />
               <FormErrorMessage>
                 {errors.divisi && "Divisi harus diisi"}
@@ -66,13 +57,7 @@ const FormModal = memo(({ dataEdit, isEdit, isOpen, onClose, onSubmit }) => {
               <FormLabel>Jabatan</FormLabel>
               <Input
                 {...register("jabatan", { required: true })}
-                value={
-                  isEdit
-                    ? !dataEdit?.jabatan
-                      ? "Mohon Tunggu..."
-                      : dataEdit?.jabatan
-                    : ""
-                }
+                defaultValue={dataEdit?.jabatan}
               />
               <FormErrorMessage>
                 {errors.jabatan && "Jabatan harus diisi"}
@@ -89,6 +74,6 @@ const FormModal = memo(({ dataEdit, isEdit, isOpen, onClose, onSubmit }) => {
       </ModalContent>
     </Modal>
   );
-});
+};
 
 export default FormModal;
