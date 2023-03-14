@@ -12,6 +12,7 @@ const ViewAll = memo((props) => {
   const [dataEdit, setDataEdit] = useState({});
 
   const handleOpenModal = () => {
+    setIsEdit(false);
     setIsModalOpen(true);
   };
 
@@ -38,7 +39,8 @@ const ViewAll = memo((props) => {
     setIsModalOpen(false);
   };
 
-  const handleAddPost = (data) => {
+  const onSubmit = (data) => {
+    console.log(isEdit, "<<< issue");
     Swal.fire({
       title: "Are you sure?",
       text: "You can check more the data",
@@ -49,20 +51,37 @@ const ViewAll = memo((props) => {
       confirmButtonText: "Yes, add it!",
     }).then((result) => {
       if (result.isConfirmed) {
-        axiosInstance
-          .post("/post", data)
-          .then((res) => {
-            Swal.fire({
-              icon: "success",
-              title: "Success!",
-              text: "Your request has been added.",
-            }).then((result) => {
-              window.location.reload();
+        if (isEdit) {
+          axiosInstance
+            .put(`post/${data?.id}`, data)
+            .then((res) => {
+              Swal.fire({
+                icon: "success",
+                title: "Success!",
+                text: "Your request has been edited.",
+              }).then((result) => {
+                window.location.reload();
+              });
+            })
+            .catch((e) => {
+              console.log(e);
             });
-          })
-          .catch((e) => {
-            console.log(e);
-          });
+        } else {
+          axiosInstance
+            .post("/post", data)
+            .then((res) => {
+              Swal.fire({
+                icon: "success",
+                title: "Success!",
+                text: "Your request has been added.",
+              }).then((result) => {
+                window.location.reload();
+              });
+            })
+            .catch((e) => {
+              console.log(e);
+            });
+        }
       }
     });
     console.log(data);
@@ -92,7 +111,7 @@ const ViewAll = memo((props) => {
           isEdit={isEdit}
           isOpen={isModalOpen}
           onClose={handleCloseModal}
-          onSubmit={handleAddPost}
+          onSubmit={onSubmit}
         />
       </Box>
     </>
