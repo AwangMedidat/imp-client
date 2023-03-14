@@ -1,48 +1,72 @@
 import axiosInstance from "@/axios/axios";
+import { fetchPosts } from "@/components/fetchers/post";
 import FormModal from "@/components/FormModal";
 import View from "@/components/View";
 import { Box, Button, Flex } from "@chakra-ui/react";
-import React, { memo, useEffect, useState } from "react";
+import React, { memo, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "react-query";
 import Swal from "sweetalert2";
 
 const ViewAll = memo((props) => {
-  const [data, setData] = useState([]);
+  const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
+  const [id, setId] = useState(0);
   const [dataEdit, setDataEdit] = useState({});
+
+  const { isError, isLoading, data } = useQuery(["posts"], fetchPosts, {
+    staleTime: 6000,
+  });
 
   const handleOpenModal = () => {
     setIsModalOpen(true);
-    setIsEdit(false)
+    setIsEdit(false);
   };
 
   const editDataModal = (id) => {
     setIsModalOpen(true);
     setIsEdit(true);
-    axiosInstance
-      .get(`/post/${id}`)
-      .then(function (response) {
-        setDataEdit({
-          id: response?.data?.data.id,
-          name: response?.data?.data.name,
-          divisi: response?.data?.data.divisi,
-          jabatan: response?.data?.data.jabatan,
-        });
-      })
-      .catch(function (error) {
-        console.log(error);
-      });
+    setId(id);
   };
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
   };
 
+  const addPost = useMutation((data) => axiosInstance.post("/post", data), {
+    onSuccess: () => {
+      queryClient.invalidateQueries("posts");
+      Swal.fire({
+        icon: "success",
+        title: "Success!",
+        text: "Your request has been added.",
+      }).then((result) => {
+        window.location.reload();
+      });
+    },
+  });
+
+  const editPost = useMutation(
+    (data) => axiosInstance.put(`/post/${id}`, data),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries("posts");
+        Swal.fire({
+          icon: "success",
+          title: "Success!",
+          text: "Your request has been edited.",
+        }).then((result) => {
+          window.location.reload();
+        });
+      },
+    }
+  );
+
   const onSubmit = (data) => {
     const updatePost = {
-        ...dataEdit,
-        ...data
-    }
+      ...dataEdit,
+      ...data,
+    };
     Swal.fire({
       title: "Are you sure?",
       text: "You can check more the data",
@@ -54,61 +78,32 @@ const ViewAll = memo((props) => {
     }).then((result) => {
       if (result.isConfirmed) {
         if (isEdit) {
-            axiosInstance
-              .put(`post/${dataEdit?.id}`, updatePost)
-              .then((res) => {
-                Swal.fire({
-                  icon: "success",
-                  title: "Success!",
-                  text: "Your request has been edited.",
-                }).then((result) => {
-                  window.location.reload();
-                });
-              })
-              .catch((e) => {
-                console.log(e);
-              });
+          editPost.mutate(updatePost);
         } else {
-          axiosInstance
-            .post("/post", data)
-            .then((res) => {
-              Swal.fire({
-                icon: "success",
-                title: "Success!",
-                text: "Your request has been added.",
-              }).then((result) => {
-                window.location.reload();
-              });
-            })
-            .catch((e) => {
-              console.log(e);
-            });
+          addPost.mutate(data);
         }
       }
     });
     handleCloseModal();
   };
-  useEffect(() => {
-    axiosInstance
-      .get("/post")
-      .then(function (response) {
-        setData(response?.data?.data);
-      })
-      .catch(function (error) {
-        console.log(error);
-      })
-      .finally(function () {});
-  }, []);
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (isError) {
+    return <div>Error...</div>;
+  }
+
   return (
     <>
       <Box>
         <Flex justify="flex-end">
           <Button onClick={handleOpenModal}>Add</Button>
         </Flex>
-
-        <View data={data} editDataModal={editDataModal} />
+        <View data={data?.data} editDataModal={editDataModal} />
         <FormModal
-          dataEdit={dataEdit}
+          id={id}
+          setDataEdit={setDataEdit}
           isEdit={isEdit}
           isOpen={isModalOpen}
           onClose={handleCloseModal}

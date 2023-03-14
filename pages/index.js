@@ -1,19 +1,8 @@
 import Head from "next/head";
-import Image from "next/image";
 import styles from "@/styles/Home.module.css";
-import { useQuery } from "react-query";
 import ViewAll from "@/layouts/Pages/ViewAll";
 
 export default function Home() {
-
-
-  const { isLoading, error, data } = useQuery("repoData", () =>
-    fetch("https://api.github.com/repos/tannerlinsley/react-query")
-      .then
-      // (res) => console.log(res.json(), "<<<< react query")
-      ()
-  );
-
   return (
     <>
       <Head>

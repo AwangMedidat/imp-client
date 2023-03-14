@@ -14,15 +14,18 @@ import {
   ModalHeader,
   ModalOverlay,
 } from "@chakra-ui/react";
+import { useQuery } from "react-query";
+import { fetchPostDetail } from "./fetchers/post";
 
-const FormModal = ({ dataEdit, isEdit, isOpen, onClose, onSubmit }) => {
+const FormModal = ({ id, setDataEdit, isEdit, isOpen, onClose, onSubmit }) => {
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm({
-    defaultValues: dataEdit,
-  });
+  } = useForm();
+
+  const { data } = useQuery(["post", id], () => fetchPostDetail(id));
+  setDataEdit(data?.data)
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} isCentered>
@@ -37,7 +40,7 @@ const FormModal = ({ dataEdit, isEdit, isOpen, onClose, onSubmit }) => {
               <Input
                 name="name"
                 {...register("name", { required: true })}
-                defaultValue={dataEdit?.name}
+                defaultValue={data?.data?.name}
               />
               <FormErrorMessage>
                 {errors.name && "Nama harus diisi"}
@@ -47,7 +50,7 @@ const FormModal = ({ dataEdit, isEdit, isOpen, onClose, onSubmit }) => {
               <FormLabel>Divisi</FormLabel>
               <Input
                 {...register("divisi", { required: true })}
-                defaultValue={dataEdit?.divisi}
+                defaultValue={data?.data?.divisi}
               />
               <FormErrorMessage>
                 {errors.divisi && "Divisi harus diisi"}
@@ -57,7 +60,7 @@ const FormModal = ({ dataEdit, isEdit, isOpen, onClose, onSubmit }) => {
               <FormLabel>Jabatan</FormLabel>
               <Input
                 {...register("jabatan", { required: true })}
-                defaultValue={dataEdit?.jabatan}
+                defaultValue={data?.data?.jabatan}
               />
               <FormErrorMessage>
                 {errors.jabatan && "Jabatan harus diisi"}
