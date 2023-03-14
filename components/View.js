@@ -15,30 +15,45 @@ import { DeleteIcon, EditIcon, InfoIcon } from "@chakra-ui/icons";
 import DetailModal from "./DetailModal";
 import styles from "@/styles/Home.module.css";
 import axiosInstance from "@/axios/axios";
+import Swal from "sweetalert2";
 
-const View = ({ data }) => {
+const View = ({ data, editDataModal }) => {
   const [selectedItem, setSelectedItem] = useState(null);
   const handleLinkClick = (item) => {
     setSelectedItem(item);
   };
 
   const handleEdit = (item) => {
-    // setSelectedItem(item);
-    console.log(item);
+    editDataModal(item);
   };
 
   const handleDelete = (item) => {
-    // setSelectedItem(item);
-    // console.log(item);
-    axiosInstance
-      .delete(`/post/${item}`)
-      .then((res) => {
-        console.log("sukses hapus");
-        window.location.reload();
-      })
-      .catch((e) => {
-        console.log(e);
-      });
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to delete this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        axiosInstance
+          .delete(`/post/${item}`)
+          .then((res) => {
+            Swal.fire({
+              icon: "success",
+              title: "Success!",
+              text: "Your request has been deleted.",
+            }).then((result) => {
+              window.location.reload();
+            });
+          })
+          .catch((e) => {
+            console.log(e);
+          });
+      }
+    });
   };
 
   return (
@@ -57,7 +72,9 @@ const View = ({ data }) => {
           </Thead>
           <Tbody>
             {data.map((e, i) => {
-              return (
+              return data.length === 0 ? (
+                <p>Mohon Tunggu ...</p>
+              ) : (
                 <>
                   <Tr key={i}>
                     <Td>{i + 1}</Td>
